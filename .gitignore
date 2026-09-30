@@ -8,3 +8,4 @@ __pycache__/
 runtime/
 artifacts/*.joblib
 data/private/
+data/warehouse.sqlite

@@ -1,14 +1,12 @@
 # Measured results
 
-Deterministic synthetic data; seed 42. Six products, 540 daily observations each. Results are from three fixed 14-day test windows, not a real retailer benchmark.
+Results use the UCI Online Retail dataset after removing cancellation invoices and non-positive quantities, completing daily demand with zeros, and selecting 12 SKUs with the most observed sale days. The raw transaction file is not included.
 
 | Measure | Result |
 |---|---:|
-| Seasonal baseline mean MAE | 4.841 |
-| Boosted model mean MAE | 4.082 |
-| Relative MAE improvement | 15.7% |
-| Nominal 90% interval observed coverage | 86.9% |
+| Seasonal baseline mean MAE | 101.813 |
+| Boosted model mean MAE | 107.825 |
+| Relative MAE change | -5.9% |
+| Nominal 90% interval observed coverage | 87.3% |
 
-The model beats the baseline on MAE in each fold. Its fixed-window inventory cost is worse in the final fold, illustrating that improved forecast error does not always improve a decision metric. Observed interval coverage is below the 90% target. These shortcomings are retained in the report.
-
-Run `python -m retail.train` to reproduce; exact values can differ with dependency/platform versions. Raw predictions, fold metrics and the temporal split metadata are included beside this file.
+The boosted model improves MAE in two of three temporal folds but fails sharply in the final fold, where it also changes the inventory cost. This honest result is retained: the model is a reproducible demand-forecasting system, not a claim that boosting universally improves retail decisions. The run used 4,488 daily SKU observations and a 492-row calibration set. See the backtest CSV and model card for fold-level details.

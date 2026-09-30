@@ -1,19 +1,25 @@
 {
-  "data_source": "deterministic synthetic retail demand; seed 42",
-  "rows": 3240,
-  "products": 6,
-  "radius": 9.044490408029347,
-  "cutoff": "2025-06-24",
-  "calibration_count": 222,
-  "train_rows": 5766,
+  "data_source": "UCI Online Retail; top 12 SKUs by observed sale days; cancellations and non-positive quantities excluded",
+  "rows": 4488,
+  "products": 12,
+  "radius": 274.24133919299777,
+  "cutoff": "2011-12-10",
+  "calibration_count": 492,
+  "train_rows": 7548,
   "skus": [
-    "COFFEE",
-    "MILK",
-    "OATS",
-    "RICE",
-    "SOAP",
-    "TEA"
+    "20725",
+    "20728",
+    "21212",
+    "22197",
+    "22423",
+    "22457",
+    "22666",
+    "22960",
+    "47566",
+    "84879",
+    "85099B",
+    "85123A"
   ],
-  "train_target_max": "2025-05-26",
-  "calibration_origin_min": "2025-06-02"
+  "train_target_max": "2011-11-11",
+  "calibration_origin_min": "2011-11-16"
 }
