@@ -1,0 +1,19 @@
+{
+  "data_source": "deterministic synthetic retail demand; seed 42",
+  "rows": 3240,
+  "products": 6,
+  "radius": 9.044490408029347,
+  "cutoff": "2025-06-24",
+  "calibration_count": 222,
+  "train_rows": 5766,
+  "skus": [
+    "COFFEE",
+    "MILK",
+    "OATS",
+    "RICE",
+    "SOAP",
+    "TEA"
+  ],
+  "train_target_max": "2025-05-26",
+  "calibration_origin_min": "2025-06-02"
+}
