@@ -10,7 +10,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--csv', help='Own daily demand CSV: date,sku,units')
     parser.add_argument('--uci-online-retail', help='Path to UCI Online Retail.xlsx')
-    parser.add_argument('--top-skus', type=int, default=12, help='Top qualifying UCI products to model')
+    parser.add_argument('--top-skus', type=int, default=12, help='Top products ranked only in the first 120 calendar days')
     args = parser.parse_args()
     if args.csv and args.uci_online_retail:
         parser.error('Use either --csv or --uci-online-retail, not both.')
