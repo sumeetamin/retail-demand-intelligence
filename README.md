@@ -50,7 +50,7 @@ flowchart LR
 
 ## Data and evaluation
 
-The reproducible real-data path uses the [UCI Online Retail dataset](https://archive.ics.uci.edu/dataset/352/online+retail). It converts completed, positive-quantity transactions into daily SKU demand; cancellation invoices and non-positive quantities are excluded, missing days are filled with zero, and the 12 SKUs with the most observed sale days are used. The raw `.xlsx` file belongs in `data/private/`, which Git ignores. The checked-in reports were generated from this dataset; no raw transactions are included. Cite UCI and review its current licence before redistributing derivative data.
+The reproducible real-data path uses the [UCI Online Retail dataset](https://archive.ics.uci.edu/dataset/352/online+retail). It converts completed, positive-quantity transactions into daily SKU demand; cancellation invoices and non-positive quantities are excluded, missing days are filled with zero, and SKUs are ranked using sale days from only the first 120 calendar days. The top qualifying products are then fixed for later backtest windows, so their selection does not use future test-period activity. The previous checked-in performance table used full-period SKU selection and is marked historical in `reports/RESULTS.md`; rerun the pipeline before citing updated metrics. The raw `.xlsx` file belongs in `data/private/`, which Git ignores. No raw transactions are included. Cite UCI and review its current licence before redistributing derivative data.
 
 To use your own data:
 
