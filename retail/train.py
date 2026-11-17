@@ -16,7 +16,7 @@ def main():
         parser.error('Use either --csv or --uci-online-retail, not both.')
     if args.uci_online_retail:
         df = validate(online_retail(args.uci_online_retail, args.top_skus))
-        source = f'UCI Online Retail; top {df.sku.nunique()} SKUs by observed sale days; cancellations and non-positive quantities excluded'
+        source = f'UCI Online Retail; top {df.sku.nunique()} SKUs ranked by sale days in the first 120 calendar days; cancellations and non-positive quantities excluded'
     elif args.csv:
         df = validate(pd.read_csv(args.csv))
         source = 'user-provided CSV'
