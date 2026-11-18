@@ -31,7 +31,14 @@ with tabs[0]:
     future = pred[pred.sku==selected].set_index('date')[['prediction', 'lower', 'upper']]
     st.line_chart(pd.concat([historical, future]))
     st.caption('Intervals use held-out chronological residuals; coverage under distribution shift is not guaranteed.')
-    plan = inventory(pred, stock, lead, holding, shortage)
+    policy_model = metrics.groupby('model').simulated_cost.mean().idxmin()
+    policy_forecast = pred.copy()
+    if policy_model == 'seasonal':
+        policy_forecast['prediction'] = policy_forecast['seasonal']
+        policy_forecast['lower'] = policy_forecast['seasonal_lower']
+        policy_forecast['upper'] = policy_forecast['seasonal_upper']
+    plan = inventory(policy_forecast, stock, lead, holding, shortage)
+    st.caption(f'Order plan uses the {policy_model} forecast because it had the lower mean realized lead-window policy cost across these three historical windows. Results are specific to the stated on-hand and cost assumptions.')
     st.subheader('Suggested replenishment')
     st.dataframe(plan, hide_index=True, width='stretch')
     st.download_button('Download order plan', plan.to_csv(index=False), 'inventory-plan.csv', 'text/csv')
