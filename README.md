@@ -64,7 +64,7 @@ Required columns: `date,sku,units`. Each SKU needs at least 120 consecutive dail
 
 Features use only history before the forecast origin. Training labels end before calibration origins. Test outcomes are never used for fitting. The final model deliberately preserves the calibration holdout instead of refitting on it and invalidating residual calibration.
 
-Intervals are empirical and do not guarantee coverage under temporal dependence or drift. The inventory planner approximates daily errors as independent normal variables and assumes one replenishment cycle. Backtest cost is a simpler fixed-window stock comparison, not a full supply-chain simulator. Sales censored by stockouts are not true demand. Promotions, supplier capacity and multi-store hierarchies are not modelled.
+Intervals are empirical and do not guarantee coverage under temporal dependence or drift. See the [proposed shadow-pilot protocol](docs/pilot_protocol.md); it has not been run. The inventory planner approximates daily errors as independent normal variables and assumes one replenishment cycle. The backtest uses the same seven-day lead-time reorder rule exposed by the dashboard, evaluated on realized lead-window demand with 100 starting units per SKU and a 1:5 holding-to-stockout penalty. This is a simplified one-cycle simulation, not a full supply-chain simulator; it omits replenishment arrivals after the first cycle, supplier constraints, demand censoring from stockouts and business-calibrated costs. Sales censored by stockouts are not true demand. Promotions, supplier capacity and multi-store hierarchies are not modelled.
 
 ## Deployment
 
