@@ -11,9 +11,9 @@ Run against the official UCI Online Retail workbook after selecting the 12 produ
 | 2011-11-26 | Seasonal baseline | 54.327 | 0.839 | 12,201 |
 | 2011-11-26 | Gradient boosting | 48.681 | 0.751 | 23,211 |
 
-Across the three windows, gradient boosting lowered mean MAE from **65.885 to 53.830** (18.3%) and achieved mean nominal 90% interval coverage of **88.5%**. Its aggregate simulated inventory cost was **72,322**, compared with **66,250** for the seasonal baseline, a 9.2% increase. The model was more accurate on units but did not minimize this simple inventory-cost measure. For this cost setup, choose the seasonal baseline until the replenishment policy is tuned and evaluated against business-calibrated costs.
+Across the three windows, gradient boosting lowered mean MAE from **65.885 to 53.830** (18.3%) and achieved mean nominal 90% interval coverage of **88.5%**. Its aggregate simulated inventory cost was **72,322**, compared with **66,250** for the seasonal baseline, a 9.2% increase. The model was more accurate on units but did not minimize this simple inventory-cost measure. For this cost setup, the dashboard selects the lower mean lead-window policy-cost forecast across these three windows; this choice is specific to the assumed initial stock, lead time and costs.
 
-The simulated cost sums fixed-window overage and shortage penalties. It is not an operating-savings estimate or a complete inventory simulation. The intervals do not guarantee future coverage. Three short windows on one retailer dataset do not establish generalization.
+The current cost simulation now runs the same seven-day lead-time reorder function used by the dashboard, with 100 starting units per SKU and the stated 1:5 holding-to-stockout penalty. It evaluates realized demand over the lead window. This remains a simplified one-cycle policy simulation, not an operating-savings estimate; it omits replenishment arrivals after the first cycle, supplier constraints, stockouts that censor observed demand, and business-calibrated costs. The intervals do not guarantee future coverage. Three short windows on one retailer dataset do not establish generalization.
 
 Reproduce the run by downloading the UCI Online Retail workbook into `data/private/` and running:
 
