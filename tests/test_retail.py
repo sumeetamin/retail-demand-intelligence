@@ -27,9 +27,14 @@ def test_feature_origin_and_inventory_monotonicity():
     bundle = fit(demo_data(days=150), pd.Timestamp('2024-05-30'))
     pred = forecast(bundle, demo_data(days=150))
     assert (pred.lower<=pred.prediction).all() and (pred.upper>=pred.prediction).all()
+    assert (pred.seasonal_lower<=pred.seasonal).all() and (pred.seasonal_upper>=pred.seasonal).all()
     low = inventory(pred, stockout_cost=1)
     high = inventory(pred, stockout_cost=20)
     assert (high.order_quantity>=low.order_quantity).all()
+    seasonal = pred.assign(prediction=pred.seasonal, lower=pred.seasonal_lower, upper=pred.seasonal_upper)
+    plan = inventory(seasonal, on_hand=100, lead_days=7)
+    assert len(plan) == demo_data(days=150).sku.nunique()
+    assert (plan.order_quantity >= 0).all()
 
 def test_api_validation():
     client = TestClient(app)
