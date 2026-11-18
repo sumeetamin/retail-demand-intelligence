@@ -35,10 +35,17 @@ with tabs[0]:
     policy_forecast = pred.copy()
     if policy_model == 'seasonal':
         policy_forecast['prediction'] = policy_forecast['seasonal']
-        policy_forecast['lower'] = policy_forecast['seasonal_lower']
-        policy_forecast['upper'] = policy_forecast['seasonal_upper']
+        if {'seasonal_lower', 'seasonal_upper'} <= set(policy_forecast.columns):
+            policy_forecast['lower'] = policy_forecast['seasonal_lower']
+            policy_forecast['upper'] = policy_forecast['seasonal_upper']
+        else:
+            # Compatibility for the currently committed report; fresh runner output
+            # uses the baseline's own calibration interval.
+            radius = float((policy_forecast['upper']-policy_forecast['prediction']).median())
+            policy_forecast['lower'] = (policy_forecast['prediction']-radius).clip(lower=0)
+            policy_forecast['upper'] = policy_forecast['prediction']+radius
     plan = inventory(policy_forecast, stock, lead, holding, shortage)
-    st.caption(f'Order plan uses the {policy_model} forecast because it had the lower mean realized lead-window policy cost across these three historical windows. Results are specific to the stated on-hand and cost assumptions.')
+    st.caption(f'Order plan uses the {policy_model} forecast because it had the lower mean realized lead-window policy cost across these three historical windows. Results are specific to the stated on-hand and cost assumptions. If the committed report predates seasonal intervals, a boosted-model interval width is used as a provisional uncertainty proxy until reports are rebuilt.')
     st.subheader('Suggested replenishment')
     st.dataframe(plan, hide_index=True, width='stretch')
     st.download_button('Download order plan', plan.to_csv(index=False), 'inventory-plan.csv', 'text/csv')
