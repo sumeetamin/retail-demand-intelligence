@@ -71,10 +71,12 @@ def fit(df, cutoff):
     model = make_pipeline(transform, HistGradientBoostingRegressor(max_iter=140, max_leaf_nodes=15, l2_regularization=2, random_state=42))
     model.fit(train[FEATURES], train.y)
     residual = np.abs(calibration.y - model.predict(calibration[FEATURES]))
+    seasonal_residual = np.abs(calibration.y - calibration.seasonal)
     n = len(residual)
     q = min(1, np.ceil((n+1)*.9)/n)
     radius = float(np.quantile(residual, q, method='higher'))
-    return dict(model=model, radius=radius, cutoff=str(pd.Timestamp(cutoff).date()),
+    seasonal_radius = float(np.quantile(seasonal_residual, q, method='higher'))
+    return dict(model=model, radius=radius, seasonal_radius=seasonal_radius, cutoff=str(pd.Timestamp(cutoff).date()),
                 calibration_count=n, train_rows=len(train), skus=sorted(df.sku.unique()),
                 train_target_max=str(train.target_date.max().date()), calibration_origin_min=str(calibration.origin.min().date()))
 
@@ -94,7 +96,9 @@ def forecast(bundle, history, horizon=14):
     result['prediction'] = np.maximum(0, bundle['model'].predict(result[FEATURES]))
     result['lower'] = np.maximum(0, result.prediction-bundle['radius'])
     result['upper'] = result.prediction+bundle['radius']
-    return result[['date', 'sku', 'prediction', 'lower', 'upper', 'seasonal']]
+    result['seasonal_lower'] = np.maximum(0, result.seasonal-bundle['seasonal_radius'])
+    result['seasonal_upper'] = result.seasonal+bundle['seasonal_radius']
+    return result[['date', 'sku', 'prediction', 'lower', 'upper', 'seasonal', 'seasonal_lower', 'seasonal_upper']]
 
 def inventory(predictions, on_hand=100, lead_days=7, holding_cost=1., stockout_cost=5.):
     if lead_days < 1 or lead_days > 14 or on_hand < 0 or holding_cost <= 0 or stockout_cost <= 0:
@@ -123,11 +127,22 @@ def backtest(df):
         predictions.append(pred)
         for name in ['seasonal', 'prediction']:
             error = pred[name]-pred.units
-            # At-order-arrival stock simulation; no real operating savings claimed.
-            decisions = pred.groupby('sku')[[name, 'units']].sum()
-            cost = (np.maximum(decisions[name]-decisions.units, 0) + 5*np.maximum(decisions.units-decisions[name], 0)).sum()
+            lower_name, upper_name = ('seasonal_lower', 'seasonal_upper') if name == 'seasonal' else ('lower', 'upper')
+            policy_input = pred[['date', 'sku', name, lower_name, upper_name]].rename(
+                columns={name: 'prediction', lower_name: 'lower', upper_name: 'upper'})
+            # Run the same lead-time reorder function shown in the app, then score
+            # realized demand against stock available at the end of the lead window.
+            lead_days = 7
+            plans = inventory(policy_input, on_hand=100, lead_days=lead_days, holding_cost=1., stockout_cost=5.)
+            actual = pred.sort_values('date').groupby('sku', sort=False).head(lead_days).groupby('sku').units.sum()
+            indexed = plans.set_index('sku')
+            available = indexed.on_hand + indexed.order_quantity
+            aligned = pd.concat([actual.rename('actual'), available.rename('available')], axis=1).fillna(0)
+            cost = float((np.maximum(aligned.available-aligned.actual, 0)
+                          + 5*np.maximum(aligned.actual-aligned.available, 0)).sum())
             records.append(dict(fold=str(cutoff.date()), model=name, mae=float(np.abs(error).mean()),
                                 wape=float(np.abs(error).sum()/max(1, pred.units.sum())), bias=float(error.mean()),
-                                coverage=float(((pred.units>=pred.lower)&(pred.units<=pred.upper)).mean()) if name=='prediction' else None,
-                                simulated_cost=float(cost)))
+                                coverage=float(((pred.units>=pred[lower_name])&(pred.units<=pred[upper_name])).mean()),
+                                simulated_cost=cost, lead_days=lead_days, starting_on_hand_per_sku=100,
+                                cost_assumptions={'holding_per_unit': 1.0, 'stockout_per_unit': 5.0}))
     return pd.DataFrame(records), pd.concat(predictions, ignore_index=True)
