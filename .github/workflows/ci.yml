@@ -10,5 +10,5 @@ jobs:
           python-version: '3.14'
           cache: pip
       - run: pip install -r requirements.txt
-      - run: python -m retail.train
+      - run: python -m retail.train --csv data/sales.csv
       - run: python -m pytest -q
